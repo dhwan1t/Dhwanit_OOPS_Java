@@ -7,7 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class service {
+public class service1 extends service {
 
     public static class CourseService {
         public void addCourse(model.Course c) {

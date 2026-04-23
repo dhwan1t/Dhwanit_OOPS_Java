@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Course Management System — Promptbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0b0c10;
+    --surface: #13151c;
+    --border: #1f2230;
+    --accent: #00e5c0;
+    --accent2: #7b61ff;
+    --warn: #ffb830;
+    --text: #e8eaf0;
+    --muted: #6b7080;
+    --tag-bg: #1a1d2a;
+    --radius: 10px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(11,12,16,0.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .logo { font-size: 13px; font-weight: 700; letter-spacing: .12em; color: var(--accent); text-transform: uppercase; }
+  .header-meta { font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 72px 32px 48px;
+    max-width: 860px; margin: 0 auto;
+    position: relative;
+  }
+  .hero-tag {
+    display: inline-block;
+    font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--accent); background: rgba(0,229,192,.08); border: 1px solid rgba(0,229,192,.2);
+    padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px); font-weight: 800; line-height: 1.15;
+    letter-spacing: -.02em;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-sub {
+    margin-top: 14px; color: var(--muted); font-size: 15px; max-width: 560px;
+  }
+  .arch-pill {
+    margin-top: 24px;
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 30px; padding: 8px 18px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted);
+  }
+  .arch-pill span { color: var(--text); }
+  .arch-sep { color: var(--accent); opacity: .5; }
+
+  /* ── LAYOUT ── */
+  .layout {
+    max-width: 860px; margin: 0 auto;
+    padding: 0 32px 80px;
+    display: flex; flex-direction: column; gap: 32px;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .section:hover { border-color: rgba(0,229,192,.25); }
+
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  .section-header:hover { background: rgba(255,255,255,.02); }
+  .section-title {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    background: rgba(0,229,192,.12); color: var(--accent);
+    border: 1px solid rgba(0,229,192,.25); flex-shrink: 0;
+  }
+  .section-name { font-size: 15px; font-weight: 700; }
+  .section-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 20px;
+  }
+  .badge-jdbc  { background: rgba(255,184,48,.1);  color: var(--warn); border: 1px solid rgba(255,184,48,.2); }
+  .badge-servlet { background: rgba(123,97,255,.12); color: var(--accent2); border: 1px solid rgba(123,97,255,.25); }
+  .badge-jsp   { background: rgba(0,229,192,.1);  color: var(--accent); border: 1px solid rgba(0,229,192,.2); }
+  .badge-swing { background: rgba(255,100,100,.1); color: #ff7070;      border: 1px solid rgba(255,100,100,.2); }
+  .badge-applet{ background: rgba(100,200,255,.1); color: #64c8ff;      border: 1px solid rgba(100,200,255,.2); }
+  .badge-setup { background: rgba(150,150,150,.1); color: #aaa;         border: 1px solid rgba(150,150,150,.2); }
+
+  .chevron { color: var(--muted); font-size: 18px; transition: transform .25s; }
+  .section.open .chevron { transform: rotate(180deg); }
+
+  .section-body { display: none; padding: 0; }
+  .section.open .section-body { display: block; }
+
+  /* ── PROMPTS ── */
+  .prompt-block {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+  }
+  .prompt-block:last-child { border-bottom: none; }
+
+  .prompt-label {
+    font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .prompt-label::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .prompt-text {
+    background: #0e1018;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.75;
+    color: #c9cfe0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    position: relative;
+  }
+
+  .copy-btn {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 10px;
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    cursor: pointer; font-family: 'Syne', sans-serif;
+    transition: all .15s;
+  }
+  .copy-btn:hover { background: rgba(0,229,192,.1); color: var(--accent); border-color: rgba(0,229,192,.3); }
+  .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+  .prompt-note {
+    margin-top: 10px;
+    font-size: 12px; color: var(--muted);
+    padding-left: 12px;
+    border-left: 2px solid rgba(255,184,48,.3);
+    line-height: 1.6;
+  }
+  .prompt-note strong { color: var(--warn); }
+
+  /* ── FILE TREE ── */
+  .file-tree {
+    background: #0e1018; border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 18px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: #8892a4; line-height: 1.9;
+    margin-top: 10px;
+  }
+  .ft-dir { color: var(--accent2); }
+  .ft-file { color: #c9cfe0; }
+  .ft-comment { color: var(--muted); font-style: italic; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar-wrap {
+    position: sticky; top: 56px; z-index: 90;
+    background: var(--bg);
+    padding: 10px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-steps {
+    max-width: 860px; margin: 0 auto;
+    display: flex; gap: 6px; align-items: center;
+  }
+  .ps { flex: 1; height: 3px; border-radius: 2px; background: var(--border); cursor: pointer; transition: background .2s; }
+  .ps.done { background: var(--accent); }
+  .ps.active { background: var(--accent2); }
+  .ps:hover { opacity: .75; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 32px;
+    font-size: 12px; color: var(--muted);
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── HIGHLIGHT TOKENS ── */
+  .hl-kw  { color: var(--accent2); }
+  .hl-str { color: var(--accent); }
+  .hl-cmt { color: var(--muted); font-style: italic; }
+  .hl-cls { color: var(--warn); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">⬡ CMS Promptbook</div>
+  <div class="header-meta">Course Management System · Viva Build</div>
+</header>
+
+<div class="progress-bar-wrap">
+  <div class="progress-steps" id="progressSteps"></div>
+</div>
+
+<div class="hero">
+  <div class="hero-tag">Vibecoding Guide</div>
+  <h1>Course Management<br/><span>Promptbook</span></h1>
+  <p class="hero-sub">Copy-paste prompts to extend your existing Java CLI project into a full JDBC + Servlet + JSP + Swing + Applet system.</p>
+  <div class="arch-pill">
+    UI <span class="arch-sep">→</span>
+    <span>Servlet</span> <span class="arch-sep">→</span>
+    <span>Service</span> <span class="arch-sep">→</span>
+    <span>JDBC</span> <span class="arch-sep">→</span>
+    <span>SQLite</span>
+  </div>
+</div>
+
+<div class="layout" id="mainLayout">
+
+  <!-- ══ STEP 0 : Project Setup ══ -->
+  <div class="section open" data-step="0">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-title">
+        <div class="step-num">0</div>
+        <div class="section-name">Project Setup &amp; File Structure</div>
+        <span class="section-badge badge-setup">Setup</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="prompt-block">
+        <div class="prompt-label">Expected Folder Structure</div>
+        <div class="file-tree">
+<span class="ft-dir">CourseManagementSystem/</span>
+├── <span class="ft-dir">src/</span>
+│   └── <span class="ft-dir">com/course/</span>
+│       ├── <span class="ft-file">model.java</span>           <span class="ft-comment">← already exists (Course, Student)</span>
+│       ├── <span class="ft-file">exception.java</span>       <span class="ft-comment">← already exists</span>
+│       ├── <span class="ft-file">service.java</span>         <span class="ft-comment">← will be updated for JDBC</span>
+│       ├── <span class="ft-file">DBConnection.java</span>    <span class="ft-comment">← new</span>
+│       ├── <span class="ft-file">CourseServlet.java</span>   <span class="ft-comment">← new</span>
+│       └── <span class="ft-file">CourseSwing.java</span>     <span class="ft-comment">← new</span>
+├── <span class="ft-dir">web/</span>
+│   ├── <span class="ft-file">index.jsp</span>             <span class="ft-comment">← form to add course</span>
+│   ├── <span class="ft-file">view.jsp</span>             <span class="ft-comment">← display all courses</span>
+│   ├── <span class="ft-file">CourseApplet.java</span>    <span class="ft-comment">← minimal applet</span>
+│   └── <span class="ft-dir">WEB-INF/</span>
+│       └── <span class="ft-file">web.xml</span>
+├── <span class="ft-file">courses.db</span>            <span class="ft-comment">← auto-created SQLite DB</span>
+└── <span class="ft-file">sqlite-jdbc-x.x.x.jar</span>
+        </div>
+        <div class="prompt-note"><strong>Note:</strong> Keep your existing <code>model.java</code> and <code>exception.java</code> as-is. Only <code>service.java</code> gets modified.</div>
+      </div>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 0-A · Scaffold the project</div>
+        <div class="prompt-text" id="p0a">I am building a Course Management System in Java for a university lab viva. 
+
+My existing code has these classes (package: Uni.OOPS_Lab.com.course):
+- model.java: static inner class Course (courseId, courseName, maxSeats, enrolledStudents with getters/setters + display()) and inner class Student (studentId, studentName)
+- exception.java: CourseFullException and CourseNotFoundException  
+- service.java: CourseService with addCourse(), enrollStudent() writing to file.txt, and viewCourses() reading from file.txt
+- main.java: CLI demo
+
+I need to extend this into a full system with JDBC (SQLite), Servlet, JSP, Swing, and an Applet — all kept as SIMPLE as possible for a viva.
+
+Architecture: UI (Swing/JSP) → Servlet → Service Layer → JDBC → SQLite
+
+Do NOT change model.java or exception.java. Start by creating the full project folder structure and a build plan listing exactly which files to create.
+<button class="copy-btn" onclick="copyPrompt('p0a',this)">Copy</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 1 : JDBC ══ -->
+  <div class="section" data-step="1">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-title">
+        <div class="step-num">1</div>
+        <div class="section-name">JDBC — Database Layer</div>
+        <span class="section-badge badge-jdbc">JDBC</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 1-A · DBConnection utility</div>
+        <div class="prompt-text" id="p1a">Create a DBConnection.java file in the package Uni.OOPS_Lab.com.course.
+
+Requirements:
+- Use SQLite via the sqlite-jdbc driver (Class.forName("org.sqlite.JDBC"))
+- Database file: "courses.db" in the project root
+- Provide a static getConnection() method returning java.sql.Connection
+- Keep it minimal — just connection management, no extra logic
+
+Also write the SQL CREATE TABLE statement for a Course table:
+  CREATE TABLE IF NOT EXISTS Course (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    maxSeats INTEGER,
+    enrolled INTEGER DEFAULT 0
+  );
+
+Show where and how this table creation SQL gets called (hint: in DBConnection or a DBInit class).
+<button class="copy-btn" onclick="copyPrompt('p1a',this)">Copy</button></div>
+      </div>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 1-B · Update service.java for JDBC</div>
+        <div class="prompt-text" id="p1b">Update service.java (CourseService class) to replace the file-based storage with JDBC/SQLite.
+
+Keep the same public method signatures so nothing else breaks:
+- addCourse(model.Course c) — INSERT into Course table
+- viewCourses() — SELECT all from Course table, print to console
+- getAllCourses() — SELECT all, return List&lt;model.Course&gt; (new method, needed by Servlet/Swing)
+
+Use DBConnection.getConnection() for all DB access.
+Use try-with-resources for Connection, PreparedStatement, ResultSet.
+Map DB columns → model.Course fields: id→courseId, name→courseName, maxSeats→maxSeats, enrolled→enrolledStudents.
+
+Keep exception handling simple — just print stack trace on SQLException.
+Do NOT change the class/method names. Do NOT use any ORM or external library beyond sqlite-jdbc.
+<button class="copy-btn" onclick="copyPrompt('p1b',this)">Copy</button></div>
+        <div class="prompt-note"><strong>Viva tip:</strong> Be ready to explain <code>PreparedStatement</code> vs <code>Statement</code> — say "PreparedStatement prevents SQL injection and is pre-compiled".</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 2 : Servlet ══ -->
+  <div class="section" data-step="2">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-title">
+        <div class="step-num">2</div>
+        <div class="section-name">Servlet — Web Controller</div>
+        <span class="section-badge badge-servlet">Servlet</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 2-A · CourseServlet.java</div>
+        <div class="prompt-text" id="p2a">Create CourseServlet.java in package Uni.OOPS_Lab.com.course.
+
+This single servlet handles both adding and viewing courses:
+
+doPost (add course):
+- Read parameters: courseName, maxSeats from request
+- Create a model.Course object and call CourseService.addCourse()
+- Redirect to GET (PRG pattern): response.sendRedirect("CourseServlet")
+
+doGet (view courses):
+- Call CourseService.getAllCourses() to get List&lt;model.Course&gt;
+- Set it as a request attribute: request.setAttribute("courses", courseList)
+- Forward to view.jsp: request.getRequestDispatcher("view.jsp").forward(...)
+
+Servlet mapping URL: /CourseServlet
+Use @WebServlet("/CourseServlet") annotation (no need for web.xml mapping).
+Import: javax.servlet.*, javax.servlet.http.*, java.util.List
+
+Keep the servlet under 50 lines. No business logic in the servlet — delegate everything to CourseService.
+<button class="copy-btn" onclick="copyPrompt('p2a',this)">Copy</button></div>
+        <div class="prompt-note"><strong>Viva tip:</strong> Explain the POST→Redirect→GET pattern: "It prevents duplicate form submissions on browser refresh."</div>
+      </div>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 2-B · web.xml</div>
+        <div class="prompt-text" id="p2b">Create WEB-INF/web.xml for the Course Management web app.
+
+Include:
+- welcome-file: index.jsp
+- servlet declaration and mapping for CourseServlet (as a fallback in case @WebServlet is not picked up)
+- Standard servlet 4.0 XML header
+
+Keep it minimal — just the essentials needed to deploy on Apache Tomcat 9+.
+<button class="copy-btn" onclick="copyPrompt('p2b',this)">Copy</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 3 : JSP ══ -->
+  <div class="section" data-step="3">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-title">
+        <div class="step-num">3</div>
+        <div class="section-name">JSP — Web UI Pages</div>
+        <span class="section-badge badge-jsp">JSP</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 3-A · index.jsp (Add Course form)</div>
+        <div class="prompt-text" id="p3a">Create index.jsp — a simple HTML form to add a course.
+
+Requirements:
+- Form action="CourseServlet" method="POST"
+- Two input fields: courseName (text) and maxSeats (number)
+- A submit button labeled "Add Course"
+- A link/button to navigate to view.jsp or CourseServlet GET to see all courses
+- Basic inline CSS — clean, readable, no external CSS framework needed
+- No scriptlets (&lt;% %&gt;) in this file — it's just a static HTML form wrapped in JSP
+
+Keep it under 40 lines total. Plain and viva-friendly.
+<button class="copy-btn" onclick="copyPrompt('p3a',this)">Copy</button></div>
+      </div>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 3-B · view.jsp (Display courses)</div>
+        <div class="prompt-text" id="p3b">Create view.jsp — displays all courses from the database.
+
+Requirements:
+- Use JSTL core tag: &lt;%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %&gt;
+- The servlet puts the course list as request attribute "courses" (List&lt;model.Course&gt;)
+- Use &lt;c:forEach items="${courses}" var="course"&gt; to loop and show each course in a table
+- Table columns: Course ID, Course Name, Max Seats, Enrolled Students
+- Show a "No courses found" message if list is empty using &lt;c:if test="${empty courses}"&gt;
+- A "Back / Add Course" link pointing to index.jsp
+- Basic inline CSS table styling only
+
+Use JSTL — no Java scriptlets. Keep it clean and simple.
+<button class="copy-btn" onclick="copyPrompt('p3b',this)">Copy</button></div>
+        <div class="prompt-note"><strong>Viva tip:</strong> If asked why JSTL: "JSTL separates Java logic from HTML presentation, following MVC — the View should not contain business logic."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 4 : Swing ══ -->
+  <div class="section" data-step="4">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-title">
+        <div class="step-num">4</div>
+        <div class="section-name">Swing — Desktop GUI</div>
+        <span class="section-badge badge-swing">Swing</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 4-A · CourseSwing.java</div>
+        <div class="prompt-text" id="p4a">Create CourseSwing.java in package Uni.OOPS_Lab.com.course — a simple Swing desktop GUI.
+
+Layout:
+- JFrame titled "Course Management System"
+- Top panel: JTextField for course name, JTextField for max seats, JButton "Add Course"
+- Center: JTable displaying all courses (columns: ID, Name, Max Seats, Enrolled)
+- Bottom: JButton "Refresh / View Courses"
+
+Behavior:
+- On "Add Course" click: read fields, create model.Course, call CourseService.addCourse(), then refresh table
+- On "Refresh" click: call CourseService.getAllCourses(), update DefaultTableModel
+- Use SwingUtilities.invokeLater to launch on EDT
+
+CourseService should be instantiated once as a field.
+The DB + JDBC is already handled by CourseService — Swing just calls it.
+
+Keep it simple: no MVC within Swing, just one class, one JFrame, straightforward ActionListeners. Under 100 lines.
+<button class="copy-btn" onclick="copyPrompt('p4a',this)">Copy</button></div>
+        <div class="prompt-note"><strong>Viva tip:</strong> "Swing is a GUI widget toolkit for Java. JFrame is the window, JPanel organizes components, and ActionListener handles button events. I used SwingUtilities.invokeLater to keep GUI updates on the Event Dispatch Thread."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 5 : Applet ══ -->
+  <div class="section" data-step="5">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-title">
+        <div class="step-num">5</div>
+        <div class="section-name">Applet — Legacy UI Demo</div>
+        <span class="section-badge badge-applet">Applet</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 5-A · CourseApplet.java</div>
+        <div class="prompt-text" id="p5a">Create CourseApplet.java — a minimal Java Applet for demonstration purposes.
+
+Requirements:
+- Extend java.applet.Applet
+- Override paint(Graphics g) method
+- Display the following text on screen using g.drawString():
+    Line 1: "Course Management System"
+    Line 2: "Built with JDBC, Servlet, JSP, Swing & Applet"
+    Line 3: "Applet is a legacy Java UI technology"
+- Use a readable font size (e.g., 16pt)
+- No interaction, no buttons — purely display
+
+Also provide the HTML applet tag snippet to embed it:
+&lt;applet code="CourseApplet.class" width="400" height="150"&gt;&lt;/applet&gt;
+
+Note: Applet is deprecated since Java 9. This is included only to fulfill the viva requirement. Mention this in the viva.
+<button class="copy-btn" onclick="copyPrompt('p5a',this)">Copy</button></div>
+        <div class="prompt-note"><strong>Viva tip:</strong> If asked about Applet deprecation: "Java Applets are deprecated since Java 9 and removed in Java 17 due to browser security restrictions. Modern alternatives are JavaFX or web technologies."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STEP 6 : Integration ══ -->
+  <div class="section" data-step="6">
+    <div class="section-header" onclick="toggle(this)">
+      <div class="section-title">
+        <div class="step-num">6</div>
+        <div class="section-name">Integration &amp; Testing Prompts</div>
+        <span class="section-badge badge-setup">Final</span>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="section-body">
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 6-A · Wire everything together</div>
+        <div class="prompt-text" id="p6a">Review all the files created so far for the Course Management System (JDBC, Servlet, JSP, Swing, Applet) and check for the following issues:
+
+1. Package names — all Java files should use the same package declaration
+2. Import statements — make sure all imports are present and correct
+3. CourseService.getAllCourses() — confirm it returns List&lt;model.Course&gt; properly
+4. CourseServlet — confirm doGet forwards to view.jsp and doPost redirects correctly
+5. view.jsp — confirm it accesses ${course.courseId}, ${course.courseName}, ${course.maxSeats}, ${course.enrolledStudents} (matching the getter names in model.Course)
+6. DBConnection — confirm the DB file path and driver class name are correct for sqlite-jdbc
+
+List any issues found and provide corrected code snippets.
+<button class="copy-btn" onclick="copyPrompt('p6a',this)">Copy</button></div>
+      </div>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 6-B · Quick viva Q&amp;A prep</div>
+        <div class="prompt-text" id="p6b">Generate 10 likely viva questions for my Course Management System project that covers JDBC, Servlet, JSP, Swing, and Applet — and provide short, clear answers (2-3 sentences each) that I can memorize.
+
+Focus on:
+- What is JDBC and how does it work?
+- Difference between Statement and PreparedStatement
+- What is a Servlet? Lifecycle methods?
+- Difference between doGet and doPost
+- What is JSP? How is it different from Servlet?
+- What is JSTL and why use it?
+- What is Swing? What is the EDT?
+- What is an Applet? Why is it deprecated?
+- What is the MVC pattern in this project?
+- How does SQLite differ from other databases?
+<button class="copy-btn" onclick="copyPrompt('p6b',this)">Copy</button></div>
+      </div>
+
+      <div class="prompt-block">
+        <div class="prompt-label">Prompt 6-C · Fix compile/runtime errors</div>
+        <div class="prompt-text" id="p6c">I'm getting the following error while running/compiling the Course Management System:
+
+[PASTE YOUR ERROR HERE]
+
+Here is the relevant file:
+
+[PASTE FILE CONTENT HERE]
+
+Diagnose the issue and provide a corrected version of the file. Keep the fix minimal — don't refactor anything beyond what's needed to fix the error. Explain what caused it in one sentence.
+<button class="copy-btn" onclick="copyPrompt('p6c',this)">Copy</button></div>
+        <div class="prompt-note"><strong>Tip:</strong> Always paste the <strong>full stack trace</strong> and the <strong>complete file</strong> — not just the error line. It gives the AI the full context to fix it correctly.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  Course Management System · Promptbook · Dhwanit · Java Viva Build
+</footer>
+
+<script>
+  // Toggle sections
+  function toggle(headerEl) {
+    const section = headerEl.closest('.section');
+    section.classList.toggle('open');
+    updateProgress();
+  }
+
+  // Copy to clipboard
+  function copyPrompt(id, btn) {
+    const el = document.getElementById(id);
+    // Get text content minus the copy button text
+    const text = el.innerText.replace(/^Copy$/m, '').replace(/\nCopy$/m, '').trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1800);
+    });
+  }
+
+  // Progress bar
+  function updateProgress() {
+    const sections = document.querySelectorAll('.section[data-step]');
+    const bar = document.getElementById('progressSteps');
+    bar.innerHTML = '';
+    sections.forEach((s, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'ps' + (s.classList.contains('open') ? ' active' : '');
+      dot.title = 'Step ' + i;
+      dot.onclick = () => {
+        s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Auto-open
+        if (!s.classList.contains('open')) {
+          s.classList.add('open');
+          updateProgress();
+        }
+      };
+      bar.appendChild(dot);
+    });
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>
