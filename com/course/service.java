@@ -29,7 +29,9 @@ public class service {
                 pstmt.setInt(2, c.getMaxSeats());
                 pstmt.setInt(3, 0);
 
+                System.out.println("Executing INSERT");
                 int rows = pstmt.executeUpdate();
+                System.out.println("Rows inserted: " + rows);
                 System.out.println("[SERVICE LOG] Rows affected: " + rows);
             } catch (SQLException e) {
                 System.err.println(

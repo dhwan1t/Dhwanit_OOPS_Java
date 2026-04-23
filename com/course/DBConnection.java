@@ -8,17 +8,19 @@ import java.sql.Statement;
 
 public class DBConnection {
 
-    // HARDCODED ABSOLUTE PATH to guarantee persistence across Tomcat restarts
     public static final String DB_PATH =
-        System.getProperty("user.home") + File.separator + "courses_prod.db";
+        System.getProperty("user.home") + File.separator + "courses.db";
     private static final String URL = "jdbc:sqlite:" + DB_PATH;
 
     static {
         System.out.println("========== DB INIT START ==========");
-        System.out.println("EXACT DB PATH: " + DB_PATH);
+        System.out.println("DB URL: " + URL);
+        System.out.println(
+            "DB absolute path: " + new File(DB_PATH).getAbsolutePath()
+        );
         try {
             Class.forName("org.sqlite.JDBC");
-            System.out.println("SQLite Driver Loaded Successfully.");
+            System.out.println("Driver loaded confirmation: org.sqlite.JDBC");
             initDatabase();
         } catch (ClassNotFoundException e) {
             System.err.println(
@@ -33,11 +35,7 @@ public class DBConnection {
 
     public static Connection getConnection() throws SQLException {
         Connection conn = DriverManager.getConnection(URL);
-        if (conn != null) {
-            System.out.println("DB Connected");
-        } else {
-            System.err.println("CRITICAL ERROR: Connection is null!");
-        }
+        System.out.println("Connected: " + (conn != null));
         return conn;
     }
 

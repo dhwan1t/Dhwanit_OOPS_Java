@@ -1,14 +1,12 @@
 package Uni.OOPS_Lab.com.course;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/CourseServlet")
 public class CourseServlet extends HttpServlet {
 
     private service.CourseService courseService = new service.CourseService();
@@ -26,10 +24,12 @@ public class CourseServlet extends HttpServlet {
         System.out.println(
             "[SERVLET LOG] GET hit - Fetching courses to display on view.jsp"
         );
+        System.out.println("Fetching courses...");
 
         try {
             List<model.Course> courseList = courseService.getAllCourses();
             request.setAttribute("courses", courseList);
+            System.out.println("Passing courses to JSP: " + courseList.size());
             request.getRequestDispatcher("view.jsp").forward(request, response);
         } catch (Exception e) {
             System.err.println(
@@ -44,6 +44,7 @@ public class CourseServlet extends HttpServlet {
         HttpServletRequest request,
         HttpServletResponse response
     ) throws ServletException, IOException {
+        System.out.println("POST HIT");
         System.out.println("POST hit");
 
         String action = request.getParameter("action");
@@ -61,6 +62,8 @@ public class CourseServlet extends HttpServlet {
                     maxSeats = Integer.parseInt(maxSeatsStr.trim());
                 }
 
+                System.out.println("courseName=" + courseName);
+                System.out.println("maxSeats=" + maxSeats);
                 System.out.println(
                     "Course: " + courseName + ", seats: " + maxSeats
                 );
@@ -76,6 +79,14 @@ public class CourseServlet extends HttpServlet {
                         maxSeats,
                         0
                     );
+                    try {
+                        Class.forName("org.sqlite.JDBC");
+                        System.out.println("Driver loaded confirmation in servlet.");
+                    } catch (ClassNotFoundException e) {
+                        System.err.println("Driver load failed in servlet.");
+                        e.printStackTrace();
+                    }
+                    System.out.println("Calling addCourse()");
                     courseService.addCourse(newCourse);
                     System.out.println(
                         "[SERVLET LOG] Successfully called addCourse on service."
