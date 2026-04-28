@@ -21,7 +21,6 @@
     <div class="container">
         <h2>Add Course</h2>
         <form action="CourseServlet" method="POST">
-            <input type="hidden" name="action" value="addCourse">
             <div class="form-group">
                 <label>Course Name:</label>
                 <input type="text" name="courseName" required>
@@ -30,7 +29,7 @@
                 <label>Max Seats:</label>
                 <input type="number" name="maxSeats" required min="1">
             </div>
-            <button type="submit">Add Course</button>
+            <button type="submit" name="action" value="addCourse">Add Course</button>
         </form>
 
         <hr>

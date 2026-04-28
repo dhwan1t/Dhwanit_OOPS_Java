@@ -1,4 +1,4 @@
-package OOPS_Lab.Experiment1_2;
+package Uni.OOPS_Lab.Experiment1_2;
 
 public class Ques2 {
     static class Area{

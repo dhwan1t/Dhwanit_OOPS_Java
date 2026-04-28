@@ -48,9 +48,10 @@ public class CourseServlet extends HttpServlet {
         System.out.println("POST hit");
 
         String action = request.getParameter("action");
-        System.out.println(
-            "[SERVLET LOG] Action parameter received: " + action
-        );
+        if (action == null) {
+            action = "addCourse";
+        }
+        System.out.println("Action received: " + action);
 
         try {
             if ("addCourse".equals(action)) {
